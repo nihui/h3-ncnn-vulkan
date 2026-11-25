@@ -34,7 +34,7 @@ jobs:
       with:
         submodules: recursive
     - name: Install build dependencies
-      run: dnf -y install nasm zip
+      run: dnf -y install nasm zip diffutils perl
     - name: build
       shell: bash
       run: |
@@ -182,6 +182,8 @@ jobs:
         update: true
         install: >-
           make
+          diffutils
+          perl
           zip
           mingw-w64-ucrt-x86_64-gcc
           mingw-w64-ucrt-x86_64-cmake
