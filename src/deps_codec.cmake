@@ -77,12 +77,12 @@ endif()
 if(USE_SYSTEM_ZLIB)
     set(zlib_library ZLIB::ZLIB)
 else()
-    if(WIN32)
+    if(MSVC)
         set(zlib_library "${archive_prefix}zlibstatic${archive_suffix}")
     else()
         set(zlib_library "${archive_prefix}z${archive_suffix}")
     endif()
-    list(APPEND bundled_codecs zlib)
+    list(APPEND bundled_codecs zlib-ng)
 endif()
 
 set(DEPS_CODEC_LIBRARIES ${vpx_library} ${opus_library} ${webm_library}
@@ -182,6 +182,8 @@ if(NOT H3_MEDIA_PREFIX)
         CMAKE_ARGS ${codec_cmake_args}
             "-DCMAKE_CXX_FLAGS:STRING=${webm_cxx_flags}"
             -DENABLE_WEBMTS=OFF
+            -DENABLE_WEBMINFO=OFF
+            -DENABLE_SAMPLE_PROGRAMS=OFF
             -DENABLE_TESTS=OFF
         BUILD_COMMAND ${codec_build_command}
         BUILD_BYPRODUCTS "${webm_library}"
@@ -196,22 +198,21 @@ if(NOT H3_MEDIA_PREFIX)
                 -DENABLE_SHARED=OFF
                 -DENABLE_STATIC=ON
                 -DWITH_TURBOJPEG=OFF
+                -DWITH_TOOLS=OFF
+                -DWITH_TESTS=OFF
             BUILD_COMMAND ${codec_build_command}
             BUILD_BYPRODUCTS "${jpeg_library}"
             INSTALL_COMMAND "")
     endif()
 
     if(NOT USE_SYSTEM_ZLIB)
-        # zlib's CMake moves zconf.h out of its source directory.
-        set(zlib_source "${CMAKE_CURRENT_BINARY_DIR}/zlib-source")
-        file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/zlib/" DESTINATION "${zlib_source}"
-            PATTERN ".git" EXCLUDE PATTERN "zconf.h" EXCLUDE)
-        ExternalProject_Add(deps-zlib
-            SOURCE_DIR "${zlib_source}"
-            BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/zlib"
+        ExternalProject_Add(deps-zlib-ng
+            SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/zlib-ng"
+            BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/zlib-ng"
             INSTALL_DIR "${codec_prefix}"
             CMAKE_ARGS ${codec_cmake_args}
-                -DZLIB_BUILD_EXAMPLES=OFF
+                -DZLIB_COMPAT=ON
+                -DBUILD_TESTING=OFF
             BUILD_COMMAND ${codec_build_command}
             BUILD_BYPRODUCTS "${zlib_library}"
             INSTALL_COMMAND "")
@@ -223,7 +224,7 @@ if(NOT H3_MEDIA_PREFIX)
             set(png_dependencies "")
         else()
             set(png_zlib_args "-DZLIB_INCLUDE_DIR=${codec_prefix}/include" "-DZLIB_LIBRARY=${zlib_library}")
-            set(png_dependencies deps-zlib)
+            set(png_dependencies deps-zlib-ng)
         endif()
         ExternalProject_Add(deps-libpng
             SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/libpng"

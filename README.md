@@ -356,7 +356,7 @@ Use `-DUSE_SYSTEM_NCNN=ON` for an installed ncnn with Vulkan and batch support. 
 
 - Neural network inference and Vulkan shader compilation. [ncnn](https://github.com/Tencent/ncnn), [glslang](https://github.com/KhronosGroup/glslang)
 - Image decoders, encoder layout and BPE tokenizer. [h3image-ncnn-vulkan](https://github.com/nihui/h3image-ncnn-vulkan), [qwenimage-ncnn-vulkan](https://github.com/nihui/qwenimage-ncnn-vulkan)
-- Image codecs. [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo), [libpng](https://github.com/pnggroup/libpng), [libwebp](https://github.com/webmproject/libwebp), [zlib](https://github.com/madler/zlib)
+- Image codecs. [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo), [libpng](https://github.com/pnggroup/libpng), [libwebp](https://github.com/webmproject/libwebp), [zlib-ng](https://github.com/zlib-ng/zlib-ng)
 - Video and audio codecs and containers. [libvpx](https://github.com/webmproject/libvpx), [libopus](https://github.com/xiph/opus), [libwebm](https://github.com/webmproject/libwebm)
 
 The standalone package includes third-party license notices.
