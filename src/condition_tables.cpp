@@ -133,7 +133,7 @@ std::string model_file_key(std::string& error, const std::filesystem::path& path
         const auto modified = fsutil::last_write_time(error, path);
         if (!error.empty())
             return {};
-        key += std::to_string(modified.time_since_epoch().count()) + ",";
+        key += std::to_string(static_cast<long long>(modified.time_since_epoch().count())) + ",";
     }
     return key + std::to_string(hash) + "]";
 }

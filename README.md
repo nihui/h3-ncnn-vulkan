@@ -342,9 +342,9 @@ cmake --build build --parallel 8
 cmake --install build --prefix "$PWD/build/package"
 ```
 
-The build requires a C/C++ compiler, CMake, Git, Ninja, Make, NASM and Vulkan development headers. CMake builds ncnn and the static media libraries from the pinned submodules under `src/`. RTTI and C++ exceptions are disabled by default (`NCNN_DISABLE_RTTI=ON`, `NCNN_DISABLE_EXCEPTION=ON`).
+The build requires a C/C++ compiler, CMake, Git, Ninja, Make, NASM, diffutils, Perl and Vulkan development headers. CMake builds ncnn and the static media libraries from the pinned submodules under `src/`. RTTI and C++ exceptions are disabled by default (`NCNN_DISABLE_RTTI=ON`, `NCNN_DISABLE_EXCEPTION=ON`).
 
-On Windows, use MSYS2 UCRT64 with GCC, CMake, Ninja, Make and NASM for the bundled build. On macOS, pass `-DVulkan_LIBRARY=/path/to/libMoltenVK.a` to link MoltenVK.
+On Windows, use MSYS2 UCRT64 with GCC, CMake, Ninja, Make, NASM, diffutils and Perl for the bundled build. On macOS, pass `-DVulkan_LIBRARY=/path/to/libMoltenVK.a` to link MoltenVK.
 
 Use `-DUSE_SYSTEM_NCNN=ON` for an installed ncnn with Vulkan and batch support. Select system image libraries with `USE_SYSTEM_JPEG`, `USE_SYSTEM_PNG`, `USE_SYSTEM_WEBP` or `USE_SYSTEM_ZLIB`. System PNG uses system zlib. For prebuilt static codecs, set `H3_MEDIA_PREFIX` to the installation prefix.
 
@@ -356,7 +356,7 @@ Use `-DUSE_SYSTEM_NCNN=ON` for an installed ncnn with Vulkan and batch support. 
 
 - Neural network inference and Vulkan shader compilation. [ncnn](https://github.com/Tencent/ncnn), [glslang](https://github.com/KhronosGroup/glslang)
 - Image decoders, encoder layout and BPE tokenizer. [h3image-ncnn-vulkan](https://github.com/nihui/h3image-ncnn-vulkan), [qwenimage-ncnn-vulkan](https://github.com/nihui/qwenimage-ncnn-vulkan)
-- Image codecs. [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo), [libpng](https://github.com/pnggroup/libpng), [libwebp](https://github.com/webmproject/libwebp), [zlib](https://github.com/madler/zlib)
+- Image codecs. [libjpeg-turbo](https://github.com/libjpeg-turbo/libjpeg-turbo), [libpng](https://github.com/pnggroup/libpng), [libwebp](https://github.com/webmproject/libwebp), [zlib-ng](https://github.com/zlib-ng/zlib-ng)
 - Video and audio codecs and containers. [libvpx](https://github.com/webmproject/libvpx), [libopus](https://github.com/xiph/opus), [libwebm](https://github.com/webmproject/libwebm)
 
 The standalone package includes third-party license notices.

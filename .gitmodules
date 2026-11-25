@@ -10,9 +10,9 @@
 [submodule "src/libwebp"]
 	path = src/libwebp
 	url = https://github.com/webmproject/libwebp.git
-[submodule "src/zlib"]
-	path = src/zlib
-	url = https://github.com/madler/zlib.git
+[submodule "src/zlib-ng"]
+	path = src/zlib-ng
+	url = https://github.com/zlib-ng/zlib-ng.git
 [submodule "src/libvpx"]
 	path = src/libvpx
 	url = https://github.com/webmproject/libvpx.git
