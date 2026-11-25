@@ -1,0 +1,24 @@
+[submodule "src/ncnn"]
+	path = src/ncnn
+	url = https://github.com/Tencent/ncnn.git
+[submodule "src/libjpeg-turbo"]
+	path = src/libjpeg-turbo
+	url = https://github.com/libjpeg-turbo/libjpeg-turbo.git
+[submodule "src/libpng"]
+	path = src/libpng
+	url = https://github.com/pnggroup/libpng.git
+[submodule "src/libwebp"]
+	path = src/libwebp
+	url = https://github.com/webmproject/libwebp.git
+[submodule "src/zlib"]
+	path = src/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "src/libvpx"]
+	path = src/libvpx
+	url = https://github.com/webmproject/libvpx.git
+[submodule "src/opus"]
+	path = src/opus
+	url = https://github.com/xiph/opus.git
+[submodule "src/libwebm"]
+	path = src/libwebm
+	url = https://github.com/webmproject/libwebm.git

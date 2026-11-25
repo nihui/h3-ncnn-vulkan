@@ -1,0 +1,8 @@
+.venv/
+build/
+logs/
+models/
+results/
+third_party/
+__pycache__/
+work/

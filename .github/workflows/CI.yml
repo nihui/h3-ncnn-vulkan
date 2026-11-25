@@ -1,0 +1,54 @@
+name: CI
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+permissions:
+  contents: read
+concurrency:
+  group: CI-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Keep Unix line endings (Windows)
+      if: runner.os == 'Windows'
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v7
+      with:
+        submodules: recursive
+    - name: Install build dependencies (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y ninja-build make nasm libvulkan-dev
+    - name: Install build dependencies (macOS)
+      if: runner.os == 'macOS'
+      run: brew install ninja nasm
+    - name: Install build dependencies (Windows)
+      if: runner.os == 'Windows'
+      uses: msys2/setup-msys2@3c51bf698df1e37b2261f53cb677b97761185c # v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: >-
+          make
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-ninja
+          mingw-w64-ucrt-x86_64-nasm
+    - name: Configure and build
+      if: runner.os != 'Windows'
+      run: |
+        cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+        cmake --build build --config Release -j 4
+    - name: Configure and build (Windows)
+      if: runner.os == 'Windows'
+      shell: msys2 {0}
+      run: |
+        cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+        cmake --build build --config Release -j 4

@@ -1,0 +1,237 @@
+name: release
+on: workflow_dispatch
+permissions:
+  contents: read
+
+env:
+  APPLICATION_NAME: h3-ncnn-vulkan
+  OPENMP_VERSION: 11.0.0
+  MOLTENVK_VERSION: 1.4.2
+  MACOSX_DEPLOYMENT_TARGET: '13.0'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      APPNAME: ${{ steps.get_appname.outputs.APPNAME }}
+      VERSION: ${{ steps.get_version.outputs.VERSION }}
+    steps:
+    - name: get-appname
+      id: get_appname
+      run: echo "APPNAME=$APPLICATION_NAME" >> "$GITHUB_OUTPUT"
+    - name: get-version
+      id: get_version
+      run: echo "VERSION=$(date -u +%Y%m%d)-$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+
+  linux:
+    needs: [setup]
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux_2_28_x86_64
+    env:
+      PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}-linux
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        submodules: recursive
+    - name: Install build dependencies
+      run: dnf -y install nasm zip
+    - name: build
+      shell: bash
+      run: |
+        export CFLAGS="-ffile-prefix-map=$PWD=."
+        export CXXFLAGS="$CFLAGS"
+        cmake -S src -B build -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++" \
+          -DOpenMP_gomp_LIBRARY="$(gcc -print-file-name=libgomp.a)"
+        cmake --build build --config Release -j 4
+        cmake --install build --prefix "$PWD/$PACKAGENAME" --strip
+    - name: package
+      shell: bash
+      run: |
+        binary="$PACKAGENAME/bin/$APPLICATION_NAME"
+        "$binary" -h
+        if grep -aFq "$PWD/" "$binary"; then
+          echo "::error::The packaged executable contains an absolute build path."
+          exit 1
+        fi
+        zip -9 -r "$PACKAGENAME.zip" "$PACKAGENAME"
+    - name: upload
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ env.PACKAGENAME }}
+        path: ${{ env.PACKAGENAME }}.zip
+        if-no-files-found: error
+
+  openmp-macos:
+    runs-on: macos-15-intel
+    steps:
+    - name: cache-openmp
+      id: cache-openmp
+      uses: actions/cache@v6
+      with:
+        path: openmp-install
+        key: openmp-macos-${{ env.OPENMP_VERSION }}-${{ env.MACOSX_DEPLOYMENT_TARGET }}
+    - name: build-openmp
+      if: steps.cache-openmp.outputs.cache-hit != 'true'
+      run: |
+        archive="openmp-$OPENMP_VERSION.src.tar.xz"
+        curl -fsSLO --retry 3 "https://github.com/llvm/llvm-project/releases/download/llvmorg-$OPENMP_VERSION/$archive"
+        tar -xf "$archive"
+        source="openmp-$OPENMP_VERSION.src"
+        export CFLAGS="-ffile-prefix-map=$PWD=."
+        export CXXFLAGS="$CFLAGS"
+        sed -i '' -e '/.size __kmp_unnamed_critical_addr/d' \
+          -e 's/__kmp_unnamed_critical_addr/___kmp_unnamed_critical_addr/g' "$source/runtime/src/z_Linux_asm.S"
+        for arch in x86_64 arm64; do
+          cmake -S "$source" -B "build-$arch" -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_OSX_ARCHITECTURES="$arch" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DCMAKE_INSTALL_PREFIX="$PWD/install-$arch" \
+            -DLIBOMP_ENABLE_SHARED=OFF -DLIBOMP_OMPT_SUPPORT=OFF -DLIBOMP_USE_HWLOC=OFF
+          cmake --build "build-$arch" --config Release -j 4
+          cmake --install "build-$arch"
+        done
+        mkdir -p openmp-install/lib
+        cp -r install-x86_64/include openmp-install/
+        cp "$source/LICENSE.txt" openmp-install/
+        lipo -create install-x86_64/lib/libomp.a install-arm64/lib/libomp.a \
+          -output openmp-install/lib/libomp.a
+    - name: upload
+      uses: actions/upload-artifact@v7
+      with:
+        name: openmp-macos
+        path: openmp-install
+        if-no-files-found: error
+
+  macos:
+    needs: [setup, openmp-macos]
+    runs-on: macos-15-intel
+    env:
+      PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}-macos
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        submodules: recursive
+    - name: download-openmp
+      uses: actions/download-artifact@v8
+      with:
+        name: openmp-macos
+        path: openmp-install
+    - name: Install build dependencies
+      run: brew install ninja nasm
+    - name: moltenvk
+      run: |
+        curl -fsSL --retry 3 \
+          "https://github.com/KhronosGroup/MoltenVK/releases/download/v$MOLTENVK_VERSION/MoltenVK-macos.tar" \
+          -o MoltenVK-macos.tar
+        tar -xf MoltenVK-macos.tar
+    - name: build
+      run: |
+        export CFLAGS="-ffile-prefix-map=$PWD=."
+        export CXXFLAGS="$CFLAGS"
+        moltenvk="$PWD/MoltenVK/MoltenVK/static/MoltenVK.xcframework/macos-arm64_x86_64/libMoltenVK.a"
+        test -f "$moltenvk"
+        for arch in x86_64 arm64; do
+          cmake -S src -B "build-$arch" -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_SYSTEM_PROCESSOR="$arch" -DCMAKE_OSX_ARCHITECTURES="$arch" \
+            "-DOpenMP_C_FLAGS=-Xclang -fopenmp -I$PWD/openmp-install/include" \
+            "-DOpenMP_CXX_FLAGS=-Xclang -fopenmp -I$PWD/openmp-install/include" \
+            -DOpenMP_C_LIB_NAMES=libomp -DOpenMP_CXX_LIB_NAMES=libomp \
+            "-DOpenMP_libomp_LIBRARY=$PWD/openmp-install/lib/libomp.a" \
+            "-DVulkan_LIBRARY=$moltenvk"
+          cmake --build "build-$arch" --config Release -j 4
+          cmake --install "build-$arch" --prefix "$PWD/install-$arch" --strip
+        done
+    - name: package
+      run: |
+        mkdir -p "$PACKAGENAME/bin"
+        cp -r install-x86_64/share "$PACKAGENAME/"
+        licenses="$PACKAGENAME/share/licenses/$APPLICATION_NAME"
+        cp openmp-install/LICENSE.txt "$licenses/llvm-openmp-LICENSE.txt"
+        cp MoltenVK/LICENSE "$licenses/MoltenVK-LICENSE.txt"
+        binary="$PACKAGENAME/bin/$APPLICATION_NAME"
+        lipo -create "install-x86_64/bin/$APPLICATION_NAME" "install-arm64/bin/$APPLICATION_NAME" -output "$binary"
+        lipo -verify_arch x86_64 arm64 "$binary"
+        "$binary" -h
+        if grep -aFq "$PWD/" "$binary"; then
+          echo "::error::The packaged executable contains an absolute build path."
+          exit 1
+        fi
+        zip -9 -r "$PACKAGENAME.zip" "$PACKAGENAME"
+    - name: upload
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ env.PACKAGENAME }}
+        path: ${{ env.PACKAGENAME }}.zip
+        if-no-files-found: error
+
+  windows:
+    needs: [setup]
+    runs-on: windows-latest
+    env:
+      PACKAGENAME: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}-windows
+    steps:
+    - name: Keep Unix line endings
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v7
+      with:
+        submodules: recursive
+    - name: Install build dependencies
+      uses: msys2/setup-msys2@3c51bf698df1e37b2261f53cb677b97761185c # v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: >-
+          make
+          zip
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-ninja
+          mingw-w64-ucrt-x86_64-nasm
+    - name: build
+      shell: msys2 {0}
+      run: |
+        workspace="$(cygpath -am "$PWD")"
+        export CFLAGS="-ffile-prefix-map=$workspace=."
+        export CXXFLAGS="$CFLAGS"
+        cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXE_LINKER_FLAGS=-static \
+          -DOpenMP_gomp_LIBRARY="$(gcc -print-file-name=libgomp.a)"
+        cmake --build build --config Release -j 4
+        cmake --install build --prefix "$PWD/$PACKAGENAME" --strip
+    - name: package
+      shell: msys2 {0}
+      run: |
+        binary="$PACKAGENAME/bin/$APPLICATION_NAME.exe"
+        "$binary" -h
+        if grep -aFq "$(cygpath -am "$PWD")/" "$binary"; then
+          echo "::error::The packaged executable contains an absolute build path."
+          exit 1
+        fi
+        zip -9 -r "$PACKAGENAME.zip" "$PACKAGENAME"
+    - name: upload
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ env.PACKAGENAME }}
+        path: ${{ env.PACKAGENAME }}.zip
+        if-no-files-found: error
+
+  release:
+    permissions:
+      contents: write
+    needs: [setup, linux, macos, windows]
+    runs-on: ubuntu-latest
+    steps:
+    - name: download
+      uses: actions/download-artifact@v8
+      with:
+        pattern: ${{ needs.setup.outputs.APPNAME }}-${{ needs.setup.outputs.VERSION }}-*
+        path: artifacts
+    - name: create-release
+      uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag_name: ${{ needs.setup.outputs.VERSION }}
+        target_commitish: ${{ github.sha }}
+        draft: true
+        name: Release ${{ needs.setup.outputs.VERSION }}
+        files: artifacts/*/*.zip
+        fail_on_unmatched_files: true

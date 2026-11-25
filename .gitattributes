@@ -1,0 +1,2 @@
+*.jpg binary
+src/patches/*.patch whitespace=-blank-at-eol
