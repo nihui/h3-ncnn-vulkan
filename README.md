@@ -58,11 +58,15 @@ Download the files for text-to-video-and-audio (T2VA) from the package root. The
 
 ```shell
 hf download nihui-szyl/h3-ncnn --local-dir models \
-    --include 'h3/LICENSE' 'h3/NOTICE' 'h3/processor/*' 'h3/text_encoder/*' \
-    'h3/vae/decoder.ncnn.*' 'h3/audio_vae/decoder.ncnn.*' \
-    'h3/transformer/fl2va/transformer-core.ncnn.*' \
-    'h3/transformer/fl2va/fixed-build/modulations.ncnn.*' \
-    'h3/transformer/fl2va/fixed-modulations-bf16-steps50-none.bin'
+    --include 'h3/LICENSE' \
+    --include 'h3/NOTICE' \
+    --include 'h3/processor/*' \
+    --include 'h3/text_encoder/*' \
+    --include 'h3/vae/decoder.ncnn.*' \
+    --include 'h3/audio_vae/decoder.ncnn.*' \
+    --include 'h3/transformer/fl2va/transformer-core.ncnn.*' \
+    --include 'h3/transformer/fl2va/fixed-build/modulations.ncnn.*' \
+    --include 'h3/transformer/fl2va/fixed-modulations-bf16-steps50-none.bin'
 ```
 
 Keep the `fixed-build` files. The runtime uses them to validate the prepared bank and to compute modulations for other schedules. The [first generation example](#example-command) uses this download.
@@ -74,18 +78,21 @@ For FL2VA with one or two image keyframes, add the vision encoder, spatial VAE e
 
 ```shell
 hf download nihui-szyl/h3-ncnn --local-dir models \
-    --include 'h3/vision/*' 'h3/vae/encoder_spatial.ncnn.*' \
-    'h3/transformer/fl2va/fixed-modulations-bf16-steps50-video.bin'
+    --include 'h3/vision/*' \
+    --include 'h3/vae/encoder_spatial.ncnn.*' \
+    --include 'h3/transformer/fl2va/fixed-modulations-bf16-steps50-video.bin'
 ```
 
 For the Ref2VA example with an image and audio, add the Ref2VA core, producer and matching bank alongside the encoders. This adds about 70 GB to the T2VA download.
 
 ```shell
 hf download nihui-szyl/h3-ncnn --local-dir models \
-    --include 'h3/vision/*' 'h3/vae/encoder_spatial.ncnn.*' 'h3/audio_vae/encoder.ncnn.*' \
-    'h3/transformer/ref2va/transformer-core.ncnn.*' \
-    'h3/transformer/ref2va/fixed-build/modulations.ncnn.*' \
-    'h3/transformer/ref2va/fixed-modulations-bf16-steps50-both.bin'
+    --include 'h3/vision/*' \
+    --include 'h3/vae/encoder_spatial.ncnn.*' \
+    --include 'h3/audio_vae/encoder.ncnn.*' \
+    --include 'h3/transformer/ref2va/transformer-core.ncnn.*' \
+    --include 'h3/transformer/ref2va/fixed-build/modulations.ncnn.*' \
+    --include 'h3/transformer/ref2va/fixed-modulations-bf16-steps50-both.bin'
 ```
 
 Use the bank that matches your references as described under [Modulation cache](#modulation-cache). An audio reference needs `audio_vae/encoder.ncnn.*`. A video reference needs `vae/encoder_temporal.ncnn.*`.
