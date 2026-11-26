@@ -38,16 +38,15 @@ The release workflow builds all three packages from source and collects them in 
 
 ### prepare model files
 
-Run the examples from the package root. Add the package’s `bin` directory to your `PATH` in the current shell:
+Place the downloaded `models/` directory next to `h3-ncnn-vulkan` (`h3-ncnn-vulkan.exe` on Windows). Run the examples from the package root. To use the command as written, add the package root to your `PATH` in the current shell:
 
-- Linux and macOS: `export PATH="$PWD/bin:$PATH"`
-- Windows (PowerShell): `$env:Path = "$PWD\bin;$env:Path"`
+- Linux and macOS: `export PATH="$PWD:$PATH"`
+- Windows (PowerShell): `$env:Path = "$PWD;$env:Path"`
 
-The default model path is `models/h3` in the package root. Set `-m` to use a different model directory.
+The default model path is `models/h3`. Set `-m` to use a different model directory.
 
 ```
-bin/
-    h3-ncnn-vulkan
+h3-ncnn-vulkan
 models/
     h3/
         LICENSE
@@ -353,6 +352,8 @@ cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel 8
 cmake --install build --prefix "$PWD/build/package"
 ```
+
+The standard CMake install puts the executable in `build/package/bin/`. The release ZIPs instead put it at the package root.
 
 The build requires a C/C++ compiler, CMake, Git, Ninja, Make, NASM, diffutils, Perl and Vulkan development headers. CMake builds ncnn and the static media libraries from the pinned submodules under `src/`. RTTI and C++ exceptions are disabled by default (`NCNN_DISABLE_RTTI=ON`, `NCNN_DISABLE_EXCEPTION=ON`).
 

@@ -40,7 +40,7 @@ jobs:
       run: |
         export CFLAGS="-ffile-prefix-map=$PWD=."
         export CXXFLAGS="$CFLAGS"
-        cmake -S src -B build -DCMAKE_BUILD_TYPE=Release \
+        cmake -S src -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_BINDIR=. \
           -DCMAKE_EXE_LINKER_FLAGS="-static-libgcc -static-libstdc++" \
           -DOpenMP_gomp_LIBRARY="$(gcc -print-file-name=libgomp.a)"
         cmake --build build --config Release -j 4
@@ -48,7 +48,7 @@ jobs:
     - name: package
       shell: bash
       run: |
-        binary="$PACKAGENAME/bin/$APPLICATION_NAME"
+        binary="$PACKAGENAME/$APPLICATION_NAME"
         "$binary" -h
         if grep -aFq "$PWD/" "$binary"; then
           echo "::error::The packaged executable contains an absolute build path."
@@ -143,12 +143,12 @@ jobs:
         done
     - name: package
       run: |
-        mkdir -p "$PACKAGENAME/bin"
+        mkdir -p "$PACKAGENAME"
         cp -r install-x86_64/share "$PACKAGENAME/"
         licenses="$PACKAGENAME/share/licenses/$APPLICATION_NAME"
         cp openmp-install/LICENSE.txt "$licenses/llvm-openmp-LICENSE.txt"
         cp MoltenVK/LICENSE "$licenses/MoltenVK-LICENSE.txt"
-        binary="$PACKAGENAME/bin/$APPLICATION_NAME"
+        binary="$PACKAGENAME/$APPLICATION_NAME"
         lipo -create "install-x86_64/bin/$APPLICATION_NAME" "install-arm64/bin/$APPLICATION_NAME" -output "$binary"
         lipo -verify_arch x86_64 arm64 "$binary"
         "$binary" -h
@@ -195,14 +195,14 @@ jobs:
         workspace="$(cygpath -am "$PWD")"
         export CFLAGS="-ffile-prefix-map=$workspace=."
         export CXXFLAGS="$CFLAGS"
-        cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXE_LINKER_FLAGS=-static \
+        cmake -S src -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_BINDIR=. -DCMAKE_EXE_LINKER_FLAGS=-static \
           -DOpenMP_gomp_LIBRARY="$(gcc -print-file-name=libgomp.a)"
         cmake --build build --config Release -j 4
         cmake --install build --prefix "$PWD/$PACKAGENAME" --strip
     - name: package
       shell: msys2 {0}
       run: |
-        binary="$PACKAGENAME/bin/$APPLICATION_NAME.exe"
+        binary="$PACKAGENAME/$APPLICATION_NAME.exe"
         "$binary" -h
         if grep -aFq "$(cygpath -am "$PWD")/" "$binary"; then
           echo "::error::The packaged executable contains an absolute build path."
