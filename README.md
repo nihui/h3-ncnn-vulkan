@@ -38,7 +38,12 @@ The release workflow builds all three packages from source and collects them in 
 
 ### prepare model files
 
-From the package root, run `./bin/h3-ncnn-vulkan`. The default model path is `models/h3` in that root. On Windows, run `.\bin\h3-ncnn-vulkan.exe` from PowerShell. Set `-m` to use a different model directory.
+Run the examples from the package root. Add the package’s `bin` directory to your `PATH` in the current shell:
+
+- Linux and macOS: `export PATH="$PWD/bin:$PATH"`
+- Windows (PowerShell): `$env:Path = "$PWD\bin;$env:Path"`
+
+The default model path is `models/h3` in the package root. Set `-m` to use a different model directory.
 
 ```
 bin/
@@ -151,14 +156,14 @@ The planner uses the ncnn graph, tensor sizes and allocation lifetimes on the se
 Text to video and audio
 
 ```shell
-./bin/h3-ncnn-vulkan -p "A red ceramic teapot slowly rotates on a pale oak table in daylight." \
+h3-ncnn-vulkan -p "A red ceramic teapot slowly rotates on a pale oak table in daylight." \
     -s 384,256 -f 56 -o teapot.webm
 ```
 
 First and last frames to video and audio
 
 ```shell
-./bin/h3-ncnn-vulkan -t fl2va -i first.png -i last.png \
+h3-ncnn-vulkan -t fl2va -i first.png -i last.png \
     -p "The red ceramic teapot slowly turns cobalt blue." \
     -s 384,256 -f 124 -o keyframes.webm
 ```
@@ -166,7 +171,7 @@ First and last frames to video and audio
 Generate a longer video with intermediate keyframes
 
 ```shell
-./bin/h3-ncnn-vulkan -t fl2va -i A.png -i B.png -i C.png -i D.png \
+h3-ncnn-vulkan -t fl2va -i A.png -i B.png -i C.png -i D.png \
     -f 73 -f 90 -f 107 \
     -p "The teapot turns to the left." \
     -p "The teapot continues turning as it moves closer." \
@@ -178,7 +183,7 @@ Pass one frame count per pair of adjacent keyframes. Use one shared prompt or on
 Multimodal references
 
 ```shell
-./bin/h3-ncnn-vulkan -t ref2va -i teapot.png --reference-audio tone.wav \
+h3-ncnn-vulkan -t ref2va -i teapot.png --reference-audio tone.wav \
     -p "Using <Picture 1> as the reference, show the teapot rotating slowly. Use <Audio 1> as the sound reference." \
     --reference-short-edge 512 -s 384,256 -f 124 -o reference.webm
 ```
@@ -186,21 +191,21 @@ Multimodal references
 Set size, frame count, scheduler steps, seed and GPU
 
 ```shell
-./bin/h3-ncnn-vulkan -s 640,352 -f 124 -l 50 -r 2026 -g 0 \
+h3-ncnn-vulkan -s 640,352 -f 124 -l 50 -r 2026 -g 0 \
     -p "A red ceramic teapot rotates on a table." -o teapot.webm
 ```
 
 Estimate memory with explicit budgets, in MiB
 
 ```shell
-./bin/h3-ncnn-vulkan --estimate-memory --ram-budget 16384 --vram-budget 32768 \
+h3-ncnn-vulkan --estimate-memory --ram-budget 16384 --vram-budget 32768 \
     -p "A red ceramic teapot rotates on a table." -s 1280,736 -f 124 -o teapot.webm
 ```
 
 Generate with the same parameters
 
 ```shell
-./bin/h3-ncnn-vulkan --ram-budget 16384 --vram-budget 32768 \
+h3-ncnn-vulkan --ram-budget 16384 --vram-budget 32768 \
     -p "A red ceramic teapot rotates on a table." -s 1280,736 -f 124 -o teapot.webm
 ```
 
@@ -209,7 +214,7 @@ A budget of `0` uses the available capacity automatically. Larger budgets keep m
 Optional rough K/V reuse
 
 ```shell
-./bin/h3-ncnn-vulkan -t fl2va -i first.png --rough-mode 2 \
+h3-ncnn-vulkan -t fl2va -i first.png --rough-mode 2 \
     -p "The red ceramic teapot slowly turns cobalt blue." \
     -s 384,256 -f 124 -o rough.webm
 ```
@@ -228,7 +233,7 @@ Rough modes reuse K/V and can change movement and sound. Active rows attend to t
 Load an adapter with `--lora`. Repeat the option to combine adapters and give `--lora-scale` values in the same order. Unspecified strengths default to 1. Merged adapters combine updates in FP32 during loading. Pika Flex Turbo evaluates its low-rank projections in Vulkan.
 
 ```shell
-./bin/h3-ncnn-vulkan -t fl2va -i teapot.png -i teapot.png \
+h3-ncnn-vulkan -t fl2va -i teapot.png -i teapot.png \
     -p "A smooth full orbit around the stationary teapot." \
     -s 640,352 -f 73 -l 29 \
     --lora minimax_h3_flf2v_lora_v1.safetensors -o orbit.webm
@@ -237,7 +242,7 @@ Load an adapter with `--lora`. Repeat the option to combine adapters and give `-
 Combine Orbit with pi-H3 in the same run. pi-H3 sets the sampling schedule.
 
 ```shell
-./bin/h3-ncnn-vulkan -t fl2va -i subject.png -i subject.png \
+h3-ncnn-vulkan -t fl2va -i subject.png -i subject.png \
     -p "A smooth 360 degree camera orbit around the stationary subject." \
     -s 384,384 -f 124 -l 3 \
     --lora minimax_h3_flf2v_lora_v1.safetensors \
@@ -250,7 +255,7 @@ Combine Orbit with pi-H3 in the same run. pi-H3 sets the sampling schedule.
 Use pi-H3 for a text-only generation
 
 ```shell
-./bin/h3-ncnn-vulkan -p "A red ceramic teapot with steam rising in daylight." \
+h3-ncnn-vulkan -p "A red ceramic teapot with steam rising in daylight." \
     -s 384,256 -f 73 \
     --lora pi_h3_4step_adapter/diffusion_pytorch_model.safetensors -o pi-h3.webm
 ```
@@ -282,9 +287,9 @@ Matching banks can be copied between machines. The loader checks model fingerpri
 Use `--bake-modulations` to precompute a portable bank for a base H3 schedule or supported pi-H3 preset. Specify the workflow and reference type.
 
 ```shell
-./bin/h3-ncnn-vulkan -t fl2va -l 17 --bake-modulations video
-./bin/h3-ncnn-vulkan -t ref2va -l 17 --bake-modulations both
-./bin/h3-ncnn-vulkan -t fl2va --lora pi_h3_2step_adapter/diffusion_pytorch_model.safetensors --bake-modulations video
+h3-ncnn-vulkan -t fl2va -l 17 --bake-modulations video
+h3-ncnn-vulkan -t ref2va -l 17 --bake-modulations both
+h3-ncnn-vulkan -t fl2va --lora pi_h3_2step_adapter/diffusion_pytorch_model.safetensors --bake-modulations video
 ```
 
 </details>
