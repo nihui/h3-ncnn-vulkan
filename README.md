@@ -412,10 +412,10 @@ non_diegetic_music: None." -o little-victory.webm
 </td>
 </tr>
 <tr>
-<td width="22%" valign="middle"><a href="videos/first.png">First frame</a><br><img src="videos/first.png" width="100%" alt="First frame"></td>
-<td width="22%" valign="middle"><a href="videos/last.png">Last frame</a><br><img src="videos/last.png" width="100%" alt="Last frame"></td>
-<td width="8%" align="center" valign="middle">➡️</td>
-<td width="44%" valign="middle">
+<td width="32%" valign="middle"><a href="videos/first.png">First frame</a><br><img src="videos/first.png" width="100%" alt="First frame"></td>
+<td width="32%" valign="middle"><a href="videos/last.png">Last frame</a><br><img src="videos/last.png" width="100%" alt="Last frame"></td>
+<td width="4%" align="center" valign="middle">➡️</td>
+<td width="32%" valign="middle">
 
 https://github.com/user-attachments/assets/f9229f79-cd16-47dd-88cd-cf80d8246b92
 
@@ -456,9 +456,9 @@ non_diegetic_music: None." -o felt-xylophone.webm
 </td>
 </tr>
 <tr>
-<td width="22%" valign="middle"><a href="videos/robot.jpg">Picture 1 · robot appearance</a><br><img src="videos/robot.jpg" width="100%" alt="Picture 1 · robot appearance"></td>
-<td width="22%" valign="middle"><a href="videos/mallet-motion.webm">Video 1 · mallet motion</a><br><img src="videos/mallet-frame.jpg" width="100%" alt="Video 1 · mallet motion"><br><a href="videos/wooden-notes.wav">Audio 1 · wooden notes</a></td>
-<td width="8%" align="center" valign="middle">➡️</td>
+<td width="26%" valign="middle"><a href="videos/robot.jpg">Picture 1 · robot appearance</a><br><img src="videos/robot.jpg" width="100%" alt="Picture 1 · robot appearance"></td>
+<td width="26%" valign="middle"><a href="videos/mallet-motion.webm">Video 1 · mallet motion</a><br><img src="videos/mallet-frame.jpg" width="100%" alt="Video 1 · mallet motion"><br><a href="videos/wooden-notes.wav">Audio 1 · wooden notes</a></td>
+<td width="4%" align="center" valign="middle">➡️</td>
 <td width="44%" valign="middle">
 
 https://github.com/user-attachments/assets/5950956e-59ef-42be-b67b-ae1ac27bd604
