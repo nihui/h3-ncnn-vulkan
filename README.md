@@ -1,8 +1,13 @@
 # MiniMax-H3 ncnn Vulkan
 
-ncnn implementation of MiniMax-H3 for video and stereo audio generation from text, keyframes or multimodal references. [MiniMax-H3](https://huggingface.co/MiniMaxAI/MiniMax-H3)
+:exclamation: :exclamation: :exclamation: More features and optimizations in progress
 
-h3-ncnn-vulkan uses ncnn for inference. [ncnn](https://github.com/Tencent/ncnn)
+![CI](https://github.com/nihui/h3-ncnn-vulkan/workflows/CI/badge.svg)
+![download](https://img.shields.io/github/downloads/nihui/h3-ncnn-vulkan/total.svg)
+
+ncnn implementation of [MiniMax-H3](https://huggingface.co/MiniMaxAI/MiniMax-H3) for video and stereo audio generation from text, keyframes or multimodal references.
+
+h3-ncnn-vulkan uses [ncnn project](https://github.com/Tencent/ncnn) as the universal neural network inference framework.
 
 ## Features
 
@@ -29,6 +34,12 @@ h3-ncnn-vulkan uses ncnn for inference. [ncnn](https://github.com/Tencent/ncnn)
 </td>
 </tr>
 </table>
+
+minimax-h3 text-to-video 832x480, 114 frames, 14GiB RAM budget
+|dit transformer 2nd step(s/it) less is better|RX9060XT|RTX3060|
+|:-:|:-:|:-:|
+|stable-diffusion.cpp (vulkan) 20261127|83.81|375.59|
+|h3image-ncnn-vulkan 20261127|59.98|138.93|
 
 ## Download
 
