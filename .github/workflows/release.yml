@@ -150,7 +150,7 @@ jobs:
         cp MoltenVK/LICENSE "$licenses/MoltenVK-LICENSE.txt"
         binary="$PACKAGENAME/$APPLICATION_NAME"
         lipo -create "install-x86_64/bin/$APPLICATION_NAME" "install-arm64/bin/$APPLICATION_NAME" -output "$binary"
-        lipo -verify_arch x86_64 arm64 "$binary"
+        lipo "$binary" -verify_arch x86_64 arm64
         "$binary" -h
         if grep -aFq "$PWD/" "$binary"; then
           echo "::error::The packaged executable contains an absolute build path."
