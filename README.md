@@ -41,6 +41,15 @@ minimax-h3 text-to-video 832x480, 124 frames, 14GiB RAM budget
 |stable-diffusion.cpp (vulkan) 20261127|83.81|375.59|
 |h3-ncnn-vulkan 20261127|59.98|138.93|
 
+minimax-h3 FL2VA 832x480, 56 frames, 14GiB RAM budget
+|dit transformer step(s/it) less is better|RX9060XT|
+|:-:|:-:|
+|stable-diffusion.cpp (vulkan) 20261127|46.19|
+|h3-ncnn-vulkan 20261127 rough-mode 0|30.97|
+|h3-ncnn-vulkan 20261127 rough-mode 1|28.43|
+|h3-ncnn-vulkan 20261127 rough-mode 2|27.98|
+|h3-ncnn-vulkan 20261127 rough-mode 3|23.96|
+
 ## Download
 
 Download the Linux x86-64 (glibc 2.28 or newer), macOS universal (Apple silicon and Intel), or Windows x86-64 ZIP from [GitHub Releases](https://github.com/nihui/h3-ncnn-vulkan/releases). For a local build, see [Build from Source](#build-from-source).
