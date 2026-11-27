@@ -35,7 +35,7 @@ h3-ncnn-vulkan uses [ncnn project](https://github.com/Tencent/ncnn) as the unive
 </tr>
 </table>
 
-minimax-h3 text-to-video 832x480, 114 frames, 14GiB RAM budget
+minimax-h3 text-to-video 832x480, 124 frames, 14GiB RAM budget
 |dit transformer 2nd step(s/it) less is better|RX9060XT|RTX3060|
 |:-:|:-:|:-:|
 |stable-diffusion.cpp (vulkan) 20261127|83.81|375.59|
