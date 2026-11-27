@@ -361,6 +361,112 @@ On Windows, use MSYS2 UCRT64 with GCC, CMake, Ninja, Make, NASM, diffutils and P
 
 Use `-DUSE_SYSTEM_NCNN=ON` for an installed ncnn with Vulkan and batch support. Select system image libraries with `USE_SYSTEM_JPEG`, `USE_SYSTEM_PNG`, `USE_SYSTEM_WEBP` or `USE_SYSTEM_ZLIB`. System PNG uses system zlib. For prebuilt static codecs, set `H3_MEDIA_PREFIX` to the installation prefix.
 
+## Sample Videos
+
+The examples below use this project's Vulkan pipeline, the base MiniMax H3 model, and the 50-point BF16 modulation banks. Each video runs at 24 fps and includes its generated stereo audio. Expand a command to see the full prompt, output size and seed.
+
+Copy the [videos directory](videos) to the package root to run the examples with reference inputs.
+
+### Text to video and audio
+
+Tram Arrives in the Rain · 1280 × 736 · 192 frames · 8 s
+
+<details>
+<summary>expand for full prompt and command</summary>
+
+```shell
+h3-ncnn-vulkan \
+    -s 1280,736 -f 192 -l 50 -r 42 --rough-mode 0 \
+    -p "integrated_multimodal_description: [Shot 1] A cinematic night street in light rain, viewed from beside a quiet tram stop at pavement height. A cream-and-teal vintage tram enters slowly from the left, its warm windows reflected in the puddles. It rings one clear bell as it passes the foreground streetlamp and eases toward the stop. [Shot 2] At 00:04.000 the camera cuts to a close-up of the near wheel and its reflection. The wheel rolls steadily for a moment, then comes to a complete stop as the brakes hiss. Droplets continue falling into the puddle as the camera holds.
+overall_soundscape: Steady light rain and a low rail rumble. One distinct bell as the tram passes the streetlamp, then a brief brake hiss timed to the wheel stopping. The rumble fades and the rain remains.
+non_diegetic_music: None." -o rain-tram.webm
+```
+
+</details>
+
+https://github.com/user-attachments/assets/a9362e39-453b-45b9-8243-6b884a483cb4
+
+### First and last frames to video and audio
+
+A Little Victory · 768 × 768 · 124 frames · 5.17 s
+
+<table width="100%">
+<tr>
+<td colspan="4">
+
+<details>
+<summary>expand for full prompt and command</summary>
+
+```shell
+h3-ncnn-vulkan \
+    -t fl2va \
+    -i videos/first.png -i videos/last.png \
+    -s 768,768 -f 124 -l 50 -r 42 --rough-mode 0 \
+    -p "integrated_multimodal_description: [Shot 1] One unbroken full-body shot of the same silver-haired, cat-eared chibi mascot between the supplied first and last frames. Keep her white-and-charcoal pixel-trim jacket, dark boots, cat-shaped hair clip, and gray tail consistent. The locked camera faces her against a clean, warm-white background throughout. She begins with both hands relaxed. She brightens, raises her right hand beside her cheek, and makes a clear V sign with two fingers while the others curl. In a bright, cheerful voice she says <d>[Chinese] 好耶！</d> once at about 00:02.500, with her mouth moving to the two syllables. She gives a small wink and holds the final pose, with a gentle tail sway. Match the supplied final frame by the end.
+overall_soundscape: A quiet room, a faint sleeve rustle as her hand rises, and one clear, close voice. No other voices.
+non_diegetic_music: None." -o little-victory.webm
+```
+
+</details>
+
+</td>
+</tr>
+<tr>
+<td width="22%" valign="middle"><a href="videos/first.png">First frame</a><br><img src="videos/first.png" width="100%" alt="First frame"></td>
+<td width="22%" valign="middle"><a href="videos/last.png">Last frame</a><br><img src="videos/last.png" width="100%" alt="Last frame"></td>
+<td width="8%" align="center" valign="middle">➡️</td>
+<td width="44%" valign="middle">
+
+https://github.com/user-attachments/assets/f9229f79-cd16-47dd-88cd-cf80d8246b92
+
+</td>
+</tr>
+</table>
+
+### Multimodal references to video and audio
+
+Felt Robot Plays the Xylophone · 1280 × 736 · 158 frames · 6.58 s
+
+<table width="100%">
+<tr>
+<td colspan="4">
+
+<details>
+<summary>expand for full prompt and command</summary>
+
+Use the Ref2VA model files and add the temporal video encoder (`h3/vae/encoder_temporal.ncnn.*`).
+
+```shell
+h3-ncnn-vulkan \
+    -t ref2va -i videos/robot.jpg \
+    --reference-video videos/mallet-motion.webm \
+    --reference-audio videos/wooden-notes.wav \
+    --reference-short-edge 768 --reference-video-short-edge 416 \
+    -s 1280,736 -f 158 -l 50 -r 42 --rough-mode 0 \
+    -p "subject_definitions: <Picture 1> is the appearance reference for the small hand-sewn orange felt robot. <Video 1> is the motion reference for the three separate mallet strikes, moving left to right. <Audio 1> is the reference for the sound and ascending pitches of the three wooden notes.
+summary: A little orange felt robot plays three notes on a miniature wooden xylophone, then looks up with a pleased smile.
+retention_analysis: Preserve the orange felt head and body, dark oval eyes, cream chest panel, short felt limbs, and single round-tipped antenna from <Picture 1>. Transfer the mallet motion from <Video 1> to one of the robot's hands. Match the three pitches and short wooden decay in <Audio 1>.
+detailed_description: [Shot 1] A single locked medium close-up at tabletop height. The robot and all three wooden bars are visible the whole time. Soft sunlight falls across the pale craft table. The robot holds one small felt-tipped mallet and looks down at the xylophone. It lifts the mallet, taps the left bar at about 00:01.500, lifts it again and taps the middle bar at 00:03.000, then taps the right bar at 00:04.500. Each note starts when the mallet visibly touches its bar and the mallet rebounds right away. It lowers the mallet and looks up at the camera, quietly pleased. The eyes, face and limbs retain their handmade felt textures.
+overall_soundscape: Three distinct dry xylophone notes, low then middle then high. Let each short note decay fully. Faint room tone under the notes. No speech.
+non_diegetic_music: None." -o felt-xylophone.webm
+```
+
+</details>
+
+</td>
+</tr>
+<tr>
+<td width="22%" valign="middle"><a href="videos/robot.jpg">Picture 1 · robot appearance</a><br><img src="videos/robot.jpg" width="100%" alt="Picture 1 · robot appearance"></td>
+<td width="22%" valign="middle"><a href="videos/mallet-motion.webm">Video 1 · mallet motion</a><br><img src="videos/mallet-frame.jpg" width="100%" alt="Video 1 · mallet motion"><br><a href="videos/wooden-notes.wav">Audio 1 · wooden notes</a></td>
+<td width="8%" align="center" valign="middle">➡️</td>
+<td width="44%" valign="middle">
+
+https://github.com/user-attachments/assets/5950956e-59ef-42be-b67b-ae1ac27bd604
+
+</td>
+</tr>
+</table>
+
 ## Original MiniMax-H3 Project
 
 - [MiniMax-H3 model and documentation](https://huggingface.co/MiniMaxAI/MiniMax-H3)
