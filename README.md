@@ -39,7 +39,7 @@ minimax-h3 text-to-video 832x480, 114 frames, 14GiB RAM budget
 |dit transformer 2nd step(s/it) less is better|RX9060XT|RTX3060|
 |:-:|:-:|:-:|
 |stable-diffusion.cpp (vulkan) 20261127|83.81|375.59|
-|h3image-ncnn-vulkan 20261127|59.98|138.93|
+|h3-ncnn-vulkan 20261127|59.98|138.93|
 
 ## Download
 
